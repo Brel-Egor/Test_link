@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Premium</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background-color: #111111;
+            color: #ffffff;
+            min-height: 100vh;
+            padding: 32px 20px 48px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            font-size: 15px;
+            color: #8e8e93;
+            line-height: 1.4;
+        }
+
+        .plan-card {
+            background: #1c1c1e;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 12px;
+            border: 1.5px solid transparent;
+            cursor: pointer;
+            transition: border-color 0.15s;
+        }
+
+        .plan-card.selected {
+            border-color: #5b7fef;
+        }
+
+        .plan-card .plan-name {
+            font-size: 17px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .plan-card .plan-price {
+            font-size: 13px;
+            color: #8e8e93;
+        }
+
+        .plan-card .plan-price span {
+            color: #5b7fef;
+            font-weight: 600;
+            font-size: 17px;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #5b7fef;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 600;
+            border-radius: 20px;
+            padding: 2px 8px;
+            margin-bottom: 8px;
+        }
+
+        .section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #8e8e93;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 24px 0 10px;
+        }
+
+        /* Buttons that trigger the native bridge */
+        .btn-primary {
+            display: block;
+            width: 100%;
+            background: #5b7fef;
+            color: #fff;
+            font-size: 17px;
+            font-weight: 600;
+            border: none;
+            border-radius: 14px;
+            padding: 14px;
+            cursor: pointer;
+            margin-bottom: 10px;
+            transition: opacity 0.15s;
+        }
+
+        .btn-primary:active {
+            opacity: 0.8;
+        }
+
+        .btn-secondary {
+            display: block;
+            width: 100%;
+            background: rgba(255,255,255,0.08);
+            color: #ffffff;
+            font-size: 17px;
+            font-weight: 600;
+            border: none;
+            border-radius: 14px;
+            padding: 14px;
+            cursor: pointer;
+            margin-bottom: 10px;
+            transition: opacity 0.15s;
+        }
+
+        .btn-secondary:active {
+            opacity: 0.6;
+        }
+
+        .btn-ghost {
+            display: block;
+            width: 100%;
+            background: transparent;
+            color: #8e8e93;
+            font-size: 14px;
+            font-weight: 500;
+            border: none;
+            padding: 12px;
+            cursor: pointer;
+            transition: opacity 0.15s;
+        }
+
+        .divider {
+            height: 1px;
+            background: rgba(255,255,255,0.08);
+            margin: 24px 0;
+        }
+
+        .log-box {
+            background: #1c1c1e;
+            border-radius: 12px;
+            padding: 14px;
+            font-size: 13px;
+            color: #32d74b;
+            font-family: "Menlo", "Courier New", monospace;
+            min-height: 60px;
+            word-break: break-all;
+        }
+
+        .log-box .placeholder {
+            color: #48484a;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1> Premium</h1>
+        <p>Choose a plan and tap a button to<br>trigger the native bridge</p>
+    </div>
+
+    <!-- Plan selection (purely visual, no native bridge) -->
+    <div class="section-title">Select plan</div>
+
+    <div class="plan-card selected" onclick="selectPlan(this)">
+        <div class="badge">Most Popular</div>
+        <div class="plan-name">12 months</div>
+        <div class="plan-price"><span>$4.99</span> / month · billed annually</div>
+    </div>
+
+    <div class="plan-card" onclick="selectPlan(this)">
+        <div class="plan-name">3 months</div>
+        <div class="plan-price"><span>$7.99</span> / month · billed quarterly</div>
+    </div>
+
+    <div class="plan-card" onclick="selectPlan(this)">
+        <div class="plan-name">1 month</div>
+        <div class="plan-price"><span>$11.99</span> / month</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section-title">Native bridge buttons</div>
+
+    <button class="btn-primary" data-chat-close="purchase">
+        Buy Subscription
+    </button>
+
+    <button class="btn-secondary" data-chat-close="redeem">
+        I Have a Code
+    </button>
+
+    <button class="btn-ghost" data-chat-close="dismiss">
+        Maybe Later
+    </button>
+
+    <div class="divider"></div>
+
+    <!-- Debug log — shows received postMessage calls (browser only, not in WKWebView) -->
+    <div class="section-title">Bridge log (browser debug)</div>
+    <div class="log-box" id="log">
+        <span class="placeholder">Waiting for button tap…</span>
+    </div>
+
+    <script>
+        // Visual plan selection toggle
+        function selectPlan(card) {
+            document.querySelectorAll('.plan-card').forEach(function(c) {
+                c.classList.remove('selected');
+            });
+            card.classList.add('selected');
+        }
+    </script>
+
+</body>
+</html>
